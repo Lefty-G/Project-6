@@ -1,10 +1,12 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const mongodbErrorHandler = require('mongoose-mongodb-errors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const stuffRoutes = require('./routes/stuff');
+const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
+const ProcessMongoDBErrors = require('mongoose-mongodb-errors');
 
 const app = express();
 
@@ -17,6 +19,8 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASS
     console.error(error);
   });
 
+mongoose.plugin(mongodbErrorHandler);
+
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -28,7 +32,8 @@ app.use(bodyParser.json());
 
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
-app.use('/api/stuff', stuffRoutes);
+app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);
+
 
 module.exports = app;
