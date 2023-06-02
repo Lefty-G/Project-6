@@ -61,13 +61,13 @@ exports.getOneSauce = (req, res, next) => {
   Sauce.findOne({
     _id: req.params.id
   }).then(
-    (sauces) => {
-      res.status(200).json(sauces);
+    (sauce) => {
+      res.status(200).json(sauce);
     }
   ).catch(
     (error) => {
       res.status(404).json({
-        error: error
+        error: error.message || error
       });
     }
   );
@@ -79,12 +79,6 @@ exports.updateSauce = (req, res, next) => {
     const url = req.protocol + '://' + req.get('host');
     req.body.sauce = JSON.parse(req.body.sauce);
     sauce = {
-      // _id: req.params.id,
-      // title: req.body.sauce.title,
-      // description: req.body.sauce.description,
-      // imageUrl: url + '/images/' + req.file.filename,
-      // price: req.body.sauce.price,
-      // userId: req.body.sauce.userId
       userId: req.body.sauce.userId,
       name: req.body.sauce.name,
       manufacturer: req.body.sauce.manufacturer,
@@ -95,12 +89,6 @@ exports.updateSauce = (req, res, next) => {
     };
   } else {
     sauce = {
-      // _id: req.params.id,
-      // title: req.body.title,
-      // description: req.body.description,
-      // imageUrl: req.body.imageUrl,
-      // price: req.body.price,
-      // userId: req.body.userId
       userId: req.body.userId,
       name: req.body.name,
       manufacturer: req.body.manufacturer,
@@ -147,3 +135,66 @@ exports.deleteSauce = (req, res, next) => {
     }
   );
 };
+
+exports.likeSauce = (req, res, next) => {
+  const userId = req.body.userId;
+  const sauceId = req.params.id;
+  const like = req.body.like;
+  Sauce.findOne({
+    _id: sauceId
+  }).then(
+    (sauce) => {
+      switch (like) {
+        case 1:
+          console.log('sauce liked');
+          resetLikeStatus(sauce, userId);
+          sauce.usersLiked.push(userId);
+          sauce.likes++;
+          break;
+        case 0:
+          console.log('Cancellin like/dislike')
+          resetLikeStatus(sauce, userId);
+          break;
+        case -1:
+          console.log('sauce disliked')
+          resetLikeStatus(sauce, userId);
+          sauce.usersDisliked.push(userId);
+          sauce.dislikes++;
+          break;
+        default:
+          throw 'Unrecognised like value'
+      }
+      Sauce.updateOne({ _id: req.params.id }, sauce).then(
+        () => {
+          res.status(200).json({
+            message: 'Sauce like registered'
+          });
+        }
+      ).catch(
+        (error) => {
+          res.status(400).json({
+            error: error.message || error
+          });
+        }
+      );
+    }
+  ).catch(
+    (error) => {
+      res.status(404).json({
+        error: error.message || error
+      });
+    }
+  );
+};
+
+function resetLikeStatus(sauce, userId) {
+  if (sauce.usersLiked.includes(userId)) {
+    sauce.likes--;
+    sauce.usersLiked = sauce.usersLiked.filter(e => e !== userId);
+  }
+
+  if (sauce.usersDisliked.includes(userId)) {
+    sauce.dislikes--;
+    sauce.usersDisLiked = sauce.usersDisLiked.filter(e => e !== userId);
+  }
+}
