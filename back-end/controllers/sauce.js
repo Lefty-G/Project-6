@@ -17,7 +17,6 @@ exports.findAll = (req, res, next) => {
 };
 
 
-//TODO add if statement to check if req.file is present, else would be if not present then imageUrl would be empty. 
 exports.createSauce = (req, res, next) => {
   let parsedSauce
   let imageUrl = null
@@ -195,6 +194,6 @@ function resetLikeStatus(sauce, userId) {
 
   if (sauce.usersDisliked.includes(userId)) {
     sauce.dislikes--;
-    sauce.usersDisLiked = sauce.usersDisLiked.filter(e => e !== userId);
+    sauce.usersDisliked = sauce.usersDisliked.filter(e => e !== userId);
   }
 }

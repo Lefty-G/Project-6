@@ -65,5 +65,3 @@ exports.login = (req, res, next) => {
   );
 };
 
-
-  // Test removing the catch from ln53
